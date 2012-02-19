@@ -1,11 +1,11 @@
 body {
-    font-family: "Open Sans";
+    font-family: "Droid Sans Mono";
     font-style: normal;
-    font-weight: 300;
+    font-weight: 400;
 }
 
 #clock {
-    width: 200px;
+    width: 250px;
     border:1px solid black;
     margin: 5px;
     padding: 3px;

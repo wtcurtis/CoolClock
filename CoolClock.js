@@ -110,3 +110,7 @@ CoolClock.prototype.SetAll = function(date) {
     this.SetDir(date);
     this.SetInt(date);
 }
+
+CoolClock.prototype.Update = function() {
+    this.SetAll(new Date());
+}
