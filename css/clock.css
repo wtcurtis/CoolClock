@@ -1,0 +1,19 @@
+body {
+    font-family: "Open Sans";
+    font-style: normal;
+    font-weight: 300;
+}
+
+#clock {
+    width: 200px;
+    border:1px solid black;
+    margin: 5px;
+    padding: 3px;
+    line-height: 200%;
+    background-color: #DDDDDD;
+    color: #BBBBBB;
+}
+
+.clock-on {
+    color: #000000;
+}
