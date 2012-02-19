@@ -63,6 +63,8 @@ CoolClock.prototype.activateFive = function() {
 
 CoolClock.prototype.SetNum = function(date) {
     var num = date.getHours() % 12 - 1;
+    var minutes = date.getMinutes();
+    if(minutes >= 40) num++;
     num = num < 0 ? 11 : num;
     this.clock_nums.map(function(a) { a.removeClass('clock-on'); });
     this.activate(this.clock_nums[num]);
