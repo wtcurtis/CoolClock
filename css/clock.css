@@ -10,10 +10,11 @@ body {
     margin: 5px;
     padding: 3px;
     line-height: 200%;
-    background-color: #DDDDDD;
+    background-color: #CCCCCC;
     color: #BBBBBB;
 }
 
 .clock-on {
-    color: #000000;
+    color: #FFF;
+    text-shadow: 0px 0px 5px #000;
 }

@@ -1,64 +1,95 @@
 var CoolClock = function(id) {
     this.numbers = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
-    this.ints = ['half', 'ten', 'quarter', 'twenty', 'five', 'minutes'];
-    this.dirs = ['to', 'past'];
+    this.intObjects = 
+        {
+        'half': 
+            {'interval': 30, 'number': false},
+        'ten': 
+            {'interval': 10, 'number': true},
+        'quarter': 
+            {'interval': 15, 'number': false},
+        'twenty': 
+            {'interval': 20, 'number': true},
+        'five': 
+            {'interval': 5, 'number': true},
+        "o'clock":
+            {'interval': 0, 'number': false},
+        'minutes': {'interval': Infinity},
+        };
+    this.dirs = {'to':1, 'past':-1};
     this.clock_el = $(id);
-    this.clock_ints = [];
-    this.clock_dirs = [];
+    this.clock_ints_objs = {};
+    this.clock_dirs_objs = {};
     this.clock_nums = [];
 
     this.active = [];
 
-    for(var i = 0; i < this.ints.length; i++)
+    for(var key in this.intObjects)
     {
-        this.clock_ints.push(
-                $('<span class="clock-int clock-int-' + this.ints[i] + '">' + this.ints[i] + ' </span>').appendTo(this.clock_el)
-                );
+        if(key == "o'clock") { continue; }
+        this.clock_ints_objs[key] = 
+            $('<span class="clock-int clock-int-' + key + '">'
+              + key + ' </span>').appendTo(this.clock_el);
     }
-    for(var i = 0; i < this.dirs.length; i++)
+
+    for(var key in this.dirs)
     {
-        this.clock_dirs.push(
-                $('<span class="clock-dir clock-dir-' + this.dirs[i] + '">' + this.dirs[i] + ' </span>').appendTo(this.clock_el)
-                );
+        this.clock_dirs_objs[key] = 
+                $('<span class="clock-dir clock-dir-' + key + 
+                  '">' + key + ' </span>')
+                .appendTo(this.clock_el);
     }
     $('<br>').appendTo(this.clock_el);
     for(var i = 0; i < this.numbers.length; i++)
     {
         this.clock_nums.push(
-                $('<span class="clock-num clock-num-' + this.numbers[i] + '">' + this.numbers[i] + ' </span>').appendTo(this.clock_el)
-                );
+                $('<span class="clock-num clock-num-' + this.numbers[i] +
+                  '">' + this.numbers[i] + ' </span>')
+                .appendTo(this.clock_el)
+        );
     }
+    this.clock_ints_objs["o'clock"] =
+        $('<span class="clock-int clock-int-oclock">o\'clock</span>')
+        .appendTo(this.clock_el);
+}
+
+CoolClock.prototype.closestInt = function(date) {
+    var minutes = date.getMinutes();
+    var until = 60 - minutes;
+    var minDiff = Infinity;
+    var minInt = {};
+    var minDir = 'past';
+
+    if(until < minutes) {
+        minutes = until;
+        minDir = 'to';
+    }
+
+    for(var key in this.intObjects) {
+        var curDiff = Math.abs(minutes - this.intObjects[key].interval);
+        if(curDiff < minDiff) {
+            minDiff = curDiff;
+            minInt = key;
+        }
+    }
+
+    if(minInt == "half") {
+        minDir = 'past';
+    }
+
+    return {'interval': minInt, 'dir': minDir};
 }
 
 CoolClock.prototype.activate = function(el) {
     el.addClass('clock-on');
 }
 
+CoolClock.prototype.deactivate = function(el) {
+    el.removeClass('clock-on');
+}
+
 CoolClock.prototype.activateMinutes = function() {
-    this.activate(this.clock_ints[5]);
-}
-
-CoolClock.prototype.activateHalf = function() {
-    this.activate(this.clock_ints[0]);
-}
-
-CoolClock.prototype.activateTen = function() {
-    this.activate(this.clock_ints[1]);
-    this.activateMinutes();
-}
-
-CoolClock.prototype.activateQuarter = function() {
-    this.activate(this.clock_ints[2]);
-}
-
-CoolClock.prototype.activateTwenty = function() {
-    this.activate(this.clock_ints[3]);
-    this.activateMinutes();
-}
-
-CoolClock.prototype.activateFive = function() {
-    this.activate(this.clock_ints[4]);
-    this.activateMinutes();
+    this.activate(this.clock_ints_objs['minutes']);
 }
 
 CoolClock.prototype.SetNum = function(date) {
@@ -70,47 +101,32 @@ CoolClock.prototype.SetNum = function(date) {
     this.activate(this.clock_nums[num]);
 }
 
-CoolClock.prototype.SetDir = function(date) {
-    this.clock_dirs.map(function(a) { a.removeClass('clock-on'); });
-    var minutes = date.getMinutes();
-    if(minutes >= 40) {
-        this.activate(this.clock_dirs[0]);
-    } else {
-        this.activate(this.clock_dirs[1]);
-    }
-}
-
 CoolClock.prototype.SetInt = function(date) {
-    this.clock_ints.map(function(a) { a.removeClass('clock-on'); });
-    var minutes = date.getMinutes();
-    if(minutes < 7) {
-        this.activateFive();
-    } else if(minutes < 13) {
-        this.activateTen();
-    } else if(minutes < 17) {
-        this.activateQuarter();
-    } else if(minutes < 23) {
-        this.activateTwenty();
-    } else if(minutes < 27) {
-        this.activateTwenty();
-        this.activateFive();
-    } else if(minutes < 40) {
-        this.activateHalf();
-    } else if(minutes < 47) {
-        this.activateQuarter();
-    } else if(minutes < 53) {
-        this.activateTen();
-    } else if(minutes <= 59) {
-        this.activateFive();
+    objMap(this.clock_ints_objs, this.deactivate);
+    objMap(this.clock_dirs_objs, this.deactivate);
+    var minInt = this.closestInt(date);
+    this.activate(this.clock_ints_objs[minInt.interval]);
+    this.activate(this.clock_dirs_objs[minInt.dir]);
+
+    if(this.intObjects[minInt.interval]['number']) {
+        this.activateMinutes();
+    }
+    if(minInt.interval === "o'clock") {
+        objMap(this.clock_dirs_objs, this.deactivate);
     }
 }
 
 CoolClock.prototype.SetAll = function(date) {
     this.SetNum(date);
-    this.SetDir(date);
     this.SetInt(date);
 }
 
 CoolClock.prototype.Update = function() {
     this.SetAll(new Date());
 }
+
+makeDate = function(h, m) { 
+    return new Date('2012-2-19 ' + h + ':' + m + ':00'); 
+}
+
+objMap = function(obj, cb) { for(var k in obj) { cb(obj[k]); } }
