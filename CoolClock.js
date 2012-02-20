@@ -92,10 +92,10 @@ CoolClock.prototype.activateMinutes = function() {
     this.activate(this.clock_ints_objs['minutes']);
 }
 
-CoolClock.prototype.SetNum = function(date) {
+CoolClock.prototype.SetNum = function(date, dir) {
     var num = date.getHours() % 12 - 1;
     var minutes = date.getMinutes();
-    if(minutes >= 40) num++;
+    if(dir === 'to') num++;
     num = num < 0 ? 11 : num;
     this.clock_nums.map(function(a) { a.removeClass('clock-on'); });
     this.activate(this.clock_nums[num]);
@@ -114,11 +114,13 @@ CoolClock.prototype.SetInt = function(date) {
     if(minInt.interval === "o'clock") {
         objMap(this.clock_dirs_objs, this.deactivate);
     }
+
+    return minInt.dir;
 }
 
 CoolClock.prototype.SetAll = function(date) {
-    this.SetNum(date);
-    this.SetInt(date);
+    var dir = this.SetInt(date);
+    this.SetNum(date, dir);
 }
 
 CoolClock.prototype.Update = function() {
