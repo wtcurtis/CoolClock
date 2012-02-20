@@ -95,7 +95,7 @@ CoolClock.prototype.activateMinutes = function() {
 CoolClock.prototype.SetNum = function(date, dir) {
     var num = date.getHours() % 12 - 1;
     var minutes = date.getMinutes();
-    if(dir === 'to') num++;
+    if(this.dirs[dir] === 1) num++;
     num = num < 0 ? 11 : num;
     this.clock_nums.map(function(a) { a.removeClass('clock-on'); });
     this.activate(this.clock_nums[num]);
