@@ -9,18 +9,28 @@
         <script>
         var clock;
 
-        function setTime(hours, minutes) {
-            clock.SetAll(new Date('2012-02-19 ' + hours + ':' + minutes + ':00'));
+        function setTime(hours, minutes, cl) {
+            cl.SetAll(makeDate(hours, minutes));
         }
 
-        function TimeStep(hours, minutes) {
-            setTime(hours, minutes); 
+        function TimeStep(hours, minutes, cl) {
+            setTime(hours, minutes, cl); 
             minutes++; 
             hours = minutes > 59 ? hours+1 : hours;
             minutes = minutes > 59 ? 0 : minutes;
             hours = hours > 23 ? 0 : hours;
             $('#time')[0].innerHTML = hours + ':' + minutes;
-            setTimeout(function() { TimeStep(hours, minutes) }, 0);
+            setTimeout(function() { TimeStep(hours, minutes, cl) }, 250);
+        };
+        
+        function TimeStep2(hours, minutes, cl) {
+            var timeString = cl.GetTimeString(makeDate(hours, minutes));
+            minutes++; 
+            hours = minutes > 59 ? hours+1 : hours;
+            minutes = minutes > 59 ? 0 : minutes;
+            hours = hours > 23 ? 0 : hours;
+            $('#clock-string')[0].innerHTML = timeString;
+            setTimeout(function() { TimeStep2(hours, minutes, cl) }, 250);
         };
 
         function UpdateClock(cl) {
@@ -30,13 +40,19 @@
 
         $(document).ready(function() {
             clock = new CoolClock('#clock');
+            clock2 = new CoolClock('#clock2');
+            clock3 = new CoolClock();
             UpdateClock(clock);
+            TimeStep(0, 0, clock2);
+            TimeStep2(0, 0, clock3);
         });
         </script>
 
     </head>
     <body>
         <div id="clock"></div>
+        <div id="clock2"></div>
         <div id="time"></div>
+        <div id="clock-string"></div>
     </body>
 </html>

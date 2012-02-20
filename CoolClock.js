@@ -2,28 +2,34 @@ var CoolClock = function(id) {
     this.numbers = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
     this.intObjects = 
         {
-        'half': 
-            {'interval': 30, 'number': false},
+        'five': 
+            {'interval': 5, 'number': true},
         'ten': 
             {'interval': 10, 'number': true},
         'quarter': 
             {'interval': 15, 'number': false},
         'twenty': 
             {'interval': 20, 'number': true},
-        'five': 
-            {'interval': 5, 'number': true},
+        'half': 
+            {'interval': 30, 'number': false},
         "o'clock":
             {'interval': 0, 'number': false},
         'minutes': {'interval': Infinity},
         };
     this.dirs = {'to':1, 'past':-1};
-    this.clock_el = $(id);
     this.clock_ints_objs = {};
     this.clock_dirs_objs = {};
     this.clock_nums = [];
+    this.bound = false;
 
-    this.active = [];
+    if(typeof id !== 'undefined') {
+        this.init(id);
+        this.bound = true;
+    }
+}
 
+CoolClock.prototype.init = function(id) {
+    this.clock_el = $(id);
     for(var key in this.intObjects)
     {
         if(key == "o'clock") { continue; }
@@ -93,12 +99,17 @@ CoolClock.prototype.activateMinutes = function() {
 }
 
 CoolClock.prototype.SetNum = function(date, dir) {
+    var num = this.GetNum(date, dir);
+    this.clock_nums.map(function(a) { a.removeClass('clock-on'); });
+    this.activate(this.clock_nums[num]);
+}
+
+CoolClock.prototype.GetNum = function(date, dir) {
     var num = date.getHours() % 12 - 1;
     var minutes = date.getMinutes();
     if(this.dirs[dir] === 1) num++;
     num = num < 0 ? 11 : num;
-    this.clock_nums.map(function(a) { a.removeClass('clock-on'); });
-    this.activate(this.clock_nums[num]);
+    return num;
 }
 
 CoolClock.prototype.SetInt = function(date) {
@@ -125,6 +136,21 @@ CoolClock.prototype.SetAll = function(date) {
 
 CoolClock.prototype.Update = function() {
     this.SetAll(new Date());
+}
+
+CoolClock.prototype.GetTimeString = function(date) {
+    var interval = this.closestInt(date);
+    var num = this.GetNum(date, interval.dir);
+
+    if(interval.interval === "o'clock") {
+        return this.numbers[num] + ' ' + interval.interval;
+    } else {
+        return interval.interval + ' ' +
+               (this.intObjects[interval.interval]['number'] ?
+                   'minutes ' : '') +
+               interval.dir + ' ' + 
+               this.numbers[num];
+    }
 }
 
 makeDate = function(h, m) { 
